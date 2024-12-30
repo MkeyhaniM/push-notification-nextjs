@@ -1,12 +1,12 @@
 'use server'
- 
 import webpush from 'web-push'
  
 webpush.setVapidDetails(
   'mailto:mahyar.keyhanii2@gmail.com',
   process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
+  process.env.VAPID_PRIVATE_KEY!,
 )
+
 
 interface PushSubscription {
     endpoint: string;
@@ -20,24 +20,22 @@ let subscription: PushSubscription | null = null
  
 export async function subscribeUser(sub: PushSubscription) {
   subscription = sub
-  console.log('Server-side subscription stored:', subscription); 
-  // In a production environment, you would want to store the subscription in a database
-  // For example: await db.subscriptions.create({ data: sub })
+  console.log('subscribeUser', subscription); 
   return { success: true }
 }
  
 export async function unsubscribeUser() {
   subscription = null
-  // In a production environment, you would want to remove the subscription from the database
-  // For example: await db.subscriptions.delete({ where: { ... } })
+  console.log('unsubscribeUser', subscription); 
   return { success: true }
 }
  
 
 export async function sendNotification(message: string) {
-    console.log(subscribeUser);
-
+    console.log(message);
+    
     if (!subscription) {
+      console.log('this value ' ,subscription);
       console.error('No subscription available on the server'); // Debugging log
       return { success: false, error: 'No subscription available' }
     }
@@ -45,7 +43,7 @@ export async function sendNotification(message: string) {
     try {
       console.log('Sending notification to:', subscription); // Debugging log
       await webpush.sendNotification(
-        subscription,
+        subscription as PushSubscription,
         JSON.stringify({
           title: 'Test Notification',
           body: message,
